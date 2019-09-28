@@ -3,9 +3,11 @@
 buildscript {
     repositories {
         jcenter()
+        maven { url 'https://maven.google.com' }
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha4'
+        classpath 'com.android.tools.build:gradle:3.5.0'
 
         // For Bintray publishing
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
@@ -16,6 +18,8 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven { url 'https://maven.google.com' }
+        google()
     }
 }
 

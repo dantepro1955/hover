@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'checkstyle'
+//apply plugin: 'checkstyle'
 
 version = '0.9.8'
 
@@ -21,11 +21,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:${supportLibVersion}"
-    compile "com.android.support:recyclerview-v7:${supportLibVersion}" // Used to get DiffUtil
+    api fileTree(dir: 'libs', include: ['*.jar'])
+    api "com.android.support:appcompat-v7:${supportLibVersion}"
+    api "com.android.support:recyclerview-v7:${supportLibVersion}" // Used to get DiffUtil
 
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 // For Bintray publishing
@@ -68,22 +68,22 @@ afterEvaluate {
 tasks.withType(Javadoc).all { enabled = false }
 
 //------ Checkstyle -------
-task checkstyle(type: Checkstyle) {
-    showViolations = true
-    configFile file("../config/checkstyle.xml")
-
-    source 'src/main/java'
-    include '**/*.java'
-    exclude '**/gen/**'
-    exclude '**/R.java'
-    exclude '**/BuildConfig.java'
-
-    // empty classpath
-    classpath = files()
-}
+//task checkstyle(type: Checkstyle) {
+//    showViolations = true
+//    configFile file("../config/checkstyle.xml")
+//
+//    source 'src/main/java'
+//    include '**/*.java'
+//    exclude '**/gen/**'
+//    exclude '**/R.java'
+//    exclude '**/BuildConfig.java'
+//
+//    // empty classpath
+//    classpath = files()
+//}
 
 project.afterEvaluate {
-    preBuild.dependsOn('checkstyle')
+//    preBuild.dependsOn('checkstyle')
     assemble.dependsOn('lint')
-    check.dependsOn('checkstyle')
+//    check.dependsOn('checkstyle')
 }
