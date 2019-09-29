@@ -73,6 +73,13 @@ public interface Dragger {
         void onReleasedAt(float x, float y);
 
         /**
+         * The user has stopped touching the drag area.
+         * @param x x-coordinate of the user's release (in the parent View's coordinate space)
+         * @param y y-coordiante of the user's release (in the parent View's coordinate space)
+         */
+        void onReleasedAt(float x, float y, int addX, int addY);
+
+        /**
          * The user tapped the drag area (instead of dragging it).
          */
         void onTap();

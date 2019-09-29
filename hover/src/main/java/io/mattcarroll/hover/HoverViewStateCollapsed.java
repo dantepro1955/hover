@@ -249,7 +249,7 @@ class HoverViewStateCollapsed extends BaseHoverViewState {
         }
     }
 
-    private void onDroppedByUser() {
+    private void onDroppedByUser(int addX, int addY) {
         mHoverView.mScreen.getExitView().setVisibility(GONE);
         if (null != mListener) {
             mListener.onDragEnd();
@@ -269,12 +269,13 @@ class HoverViewStateCollapsed extends BaseHoverViewState {
         } else {
             int tabSize = mHoverView.getResources().getDimensionPixelSize(R.dimen.hover_tab_size);
             Point screenSize = new Point(mHoverView.mScreen.getWidth(), mHoverView.mScreen.getHeight());
-            float tabHorizontalPositionPercent = (float) mFloatingTab.getPosition().x / screenSize.x;
+            float tabHorizontalPositionPercent = (float) (mFloatingTab.getPosition().x + addX*3) / screenSize.x;
             float tabVerticalPosition = (float) mFloatingTab.getPosition().y / screenSize.y;
             Log.d(TAG, "Dropped at horizontal " + tabHorizontalPositionPercent + ", vertical " + tabVerticalPosition);
             SideDock.SidePosition sidePosition = new SideDock.SidePosition(
                     tabHorizontalPositionPercent <= 0.5 ? SideDock.SidePosition.LEFT : SideDock.SidePosition.RIGHT,
-                    tabVerticalPosition
+                    tabVerticalPosition,
+                    new Point(addX, addY)
             );
             mHoverView.mCollapsedDock = new SideDock(
                     mHoverView,
@@ -286,6 +287,10 @@ class HoverViewStateCollapsed extends BaseHoverViewState {
 
             sendToDock();
         }
+    }
+
+    private void onDroppedByUser() {
+        onDroppedByUser(0,0);
     }
 
     private void onTap() {
@@ -414,6 +419,11 @@ class HoverViewStateCollapsed extends BaseHoverViewState {
         @Override
         public void onReleasedAt(float x, float y) {
             mOwner.onDroppedByUser();
+        }
+
+        @Override
+        public void onReleasedAt(float x, float y, int addX, int addY) {
+            mOwner.onDroppedByUser(addX, addY);
         }
 
         @Override

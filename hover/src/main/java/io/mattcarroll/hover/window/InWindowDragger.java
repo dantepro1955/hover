@@ -21,7 +21,9 @@ import android.graphics.PointF;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.widget.Toast;
 
 import io.mattcarroll.hover.Dragger;
 
@@ -31,6 +33,8 @@ import io.mattcarroll.hover.Dragger;
 public class InWindowDragger implements Dragger {
 
     private static final String TAG = "InWindowDragger";
+
+    private static final float HOVER_MOVE_TIME = 300f;
 
     private final Context mContext;
     private final WindowViewController mWindowViewController;
@@ -46,9 +50,15 @@ public class InWindowDragger implements Dragger {
     private PointF mCurrentViewPosition = new PointF();
     private PointF mOriginalTouchPosition = new PointF();
 
+    private VelocityTracker mVelocityTracker = null;
+
     private View.OnTouchListener mDragTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
+            if(mVelocityTracker != null && motionEvent.getAction() != MotionEvent.ACTION_UP){
+                // Velocity Tracker
+                mVelocityTracker.addMovement(motionEvent);
+            }
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Log.d(TAG, "ACTION_DOWN");
@@ -60,9 +70,19 @@ public class InWindowDragger implements Dragger {
 
                     mDragListener.onPress(mCurrentViewPosition.x, mCurrentViewPosition.y);
 
+                    // Velocity Tracker
+                    if(mVelocityTracker == null) {
+                        // Retrieve a new VelocityTracker object to watch the velocity of a motion.
+                        // When you want to determine the velocity, call
+                        // computeCurrentVelocity(). Then call getXVelocity()
+                        // and getYVelocity() to retrieve the velocity for each pointer ID.
+                        mVelocityTracker = VelocityTracker.obtain();
+                    } else {
+                        mVelocityTracker.clear();
+                    }
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    Log.d(TAG, "ACTION_MOVE. motionX: " + motionEvent.getRawX() + ", motionY: " + motionEvent.getRawY());
+                    //Log.d(TAG, "ACTION_MOVE. motionX: " + motionEvent.getRawX() + ", motionY: " + motionEvent.getRawY());
                     float dragDeltaX = motionEvent.getRawX() - mOriginalTouchPosition.x;
                     float dragDeltaY = motionEvent.getRawY() - mOriginalTouchPosition.y;
                     mCurrentViewPosition = new PointF(
@@ -73,7 +93,7 @@ public class InWindowDragger implements Dragger {
                     if (mIsDragging || !isTouchWithinSlopOfOriginalTouch(dragDeltaX, dragDeltaY)) {
                         if (!mIsDragging) {
                             // Dragging just started
-                            Log.d(TAG, "MOVE Start Drag.");
+                            //Log.d(TAG, "MOVE Start Drag.");
                             mIsDragging = true;
                             mDragListener.onDragStart(mCurrentViewPosition.x, mCurrentViewPosition.y);
                         } else {
@@ -81,7 +101,6 @@ public class InWindowDragger implements Dragger {
                             mDragListener.onDragTo(mCurrentViewPosition.x, mCurrentViewPosition.y);
                         }
                     }
-
                     return true;
                 case MotionEvent.ACTION_UP:
                     Log.d(TAG, "ACTION_UP");
@@ -89,10 +108,21 @@ public class InWindowDragger implements Dragger {
                         Log.d(TAG, "Reporting as a tap.");
                         mDragListener.onTap();
                     } else {
-                        Log.d(TAG, "Reporting as a drag release at: " + mCurrentViewPosition);
-                        mDragListener.onReleasedAt(mCurrentViewPosition.x, mCurrentViewPosition.y);
+                        // Velocity Tracker
+                        // A value of 1 provides pixels per millisecond, 1000 provides pixels per second
+                        int addX = 0;
+                        int addY = 0;
+                        if(mVelocityTracker != null) {
+                            mVelocityTracker.computeCurrentVelocity(1);
+                            addX = (int) (mVelocityTracker.getXVelocity() * HOVER_MOVE_TIME);
+                            addY = (int) (mVelocityTracker.getYVelocity() * HOVER_MOVE_TIME);
+                            Log.d(TAG, "Reporting as a drag release at: " + mCurrentViewPosition);
+                        }
+                        mDragListener.onReleasedAt(mCurrentViewPosition.x, mCurrentViewPosition.y, addX, addY);
                     }
-
+                    if(mVelocityTracker != null) {
+                        mVelocityTracker.clear();
+                    }
                     return true;
                 default:
                     return false;
