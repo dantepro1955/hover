@@ -79,11 +79,19 @@ public class SideDock extends Dock {
 
         public Point calculateDockPosition(@NonNull Point screenSize, int tabSize) {
             Log.d(TAG, "Calculating dock position. Screen size: " + screenSize + ", tab size: " + tabSize);
+            /* calculate left and right border */
+            int margin = ((int) (tabSize * 0.3));
             int x = LEFT == mSide
-                    ? ((int) (tabSize * 0.25))
-                    : screenSize.x - ((int) (tabSize * 0.25));
+                    ? margin
+                    : screenSize.x - margin;
 
             int y = (int) (screenSize.y * mVerticalDockPositionPercentage);
+            /* calculate top and bottom border */
+            if(y < margin) {
+                y = margin;
+            } else if(y > (screenSize.y - margin)) {
+                y = screenSize.y - margin;
+            }
 
             return new Point(x, y);
         }
